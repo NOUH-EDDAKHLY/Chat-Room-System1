@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chat Room</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script defer src="/rxjs.js"></script>
+    <script type="module" src="/app.js?v=final-v1"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand"><span class="brand-icon" aria-hidden="true">#</span> Chat Room</div>
+        <div class="top-actions">
+            <span id="connection" class="connection" role="status">Signed out</span>
+            <span id="account"></span>
+            <button id="logout" class="quiet" hidden>Log out</button>
+        </div>
+    </header>
+    <main>
+        <section id="auth" class="auth">
+            <div class="auth-card">
+                <h1>Sign in to chat</h1>
+                <form id="auth-form">
+                    <label>Username <input name="username" autocomplete="username" required></label>
+                    <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+                    <div class="form-actions">
+                        <button name="action" value="login">Log in</button>
+                        <button name="action" value="register" class="action-primary">Register</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="workspace" class="workspace" hidden>
+            <aside class="rooms panel" aria-labelledby="rooms-title">
+                <div class="panel-heading"><h2 id="rooms-title">Rooms</h2></div>
+                <form id="join-form">
+                    <div id="room-list" class="room-list"></div>
+                    <button id="join" type="submit" disabled>Join selected</button>
+                </form>
+                <details class="create">
+                    <summary>Create a room</summary>
+                    <form id="create-form">
+                        <label>Name <input name="name" required maxlength="80"></label>
+                        <label>Description <input name="description" required maxlength="240"></label>
+                        <button type="submit" class="action-primary">Create room</button>
+                    </form>
+                </details>
+            </aside>
+
+            <section class="chat panel" aria-labelledby="timeline-title">
+                <div class="panel-heading">
+                    <div><h1 id="timeline-title">Message timeline</h1><p>Messages from your joined rooms</p></div>
+                </div>
+                <ol id="timeline" aria-label="Messages in server order"></ol>
+                <p id="empty" class="empty">Join a room to see its messages.</p>
+                <form id="message-form" class="composer">
+                    <div class="message-options">
+                        <div class="field"><label for="message-room">Room</label><select id="message-room" name="room" required></select></div>
+                        <label>Recipient (for private messages) <input name="recipient" placeholder="Username (e.g. Sara)" maxlength="80" autocomplete="off"></label>
+                    </div>
+                    <div class="send-row">
+                        <input name="text" aria-label="Message" placeholder="Write a message…" required maxlength="4000">
+                        <button id="send" type="submit" disabled>Send to room</button>
+                        <button id="send-private" class="private-send" type="button">Send privately</button>
+                    </div>
+                    <p class="recipient-hint">To send a direct message, enter the recipient's username and choose <strong>Send privately</strong>. Both users must be in the selected room. Only you and the recipient can see it.</p>
+                </form>
+            </section>
+
+            <aside class="membership panel" aria-labelledby="members-title">
+                <div class="panel-heading"><h2 id="members-title">Joined rooms</h2></div>
+                <div class="number-card"><strong id="total" aria-live="polite">0</strong><span>Total memberships</span></div>
+                <ul id="joined"></ul>
+            </aside>
+        </section>
+        <p id="status" class="status" role="status" hidden></p>
+    </main>
+</body>
+</html>
