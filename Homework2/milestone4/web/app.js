@@ -6,6 +6,7 @@ const chat = createChatStreams();
 const joinRoomRequests$ = new Subject();
 const joiningRooms = new Set();
 const selectedRooms = new Set();
+const expandedRooms = new Set();
 let availableRooms = [];
 let token = null;
 let events = null;
@@ -93,27 +94,70 @@ function showRoomChoices() {
     element('join').disabled = !selectedRooms.size;
 }
 
+async function loadMembers(roomId, list) {
+    const session = token;
+    list.textContent = 'Loading members...';
+    try {
+        const result = await soapCall('listUsers', { token: session, roomId });
+        if (session !== token || !list.isConnected || !expandedRooms.has(roomId)) return;
+        const names = (result.message || '').split(',').map(name => name.trim()).filter(Boolean);
+        list.replaceChildren(...names.map(name => {
+            const user = document.createElement('div');
+            user.textContent = name;
+            return user;
+        }));
+        if (!names.length) list.textContent = 'No members found.';
+    } catch (error) {
+        if (session === token && list.isConnected && expandedRooms.has(roomId)) {
+            list.textContent = error.message;
+        }
+    }
+}
+
 function showJoinedRooms() {
     const list = element('joined');
     const select = element('message-room');
     const previous = select.value;
+    for (const id of expandedRooms) {
+        if (!roomCounts.some(room => room.id === id)) expandedRooms.delete(id);
+    }
     list.replaceChildren();
     select.replaceChildren();
     for (const room of roomCounts) {
         const item = document.createElement('li');
+        const info = document.createElement('div');
+        info.className = 'room-info';
         const label = document.createElement('span');
         const name = getRoomName(room.id);
         label.textContent = name;
         const count = document.createElement('small');
         count.textContent = `${room.count} ${room.count === 1 ? 'member' : 'members'}`;
         label.append(count);
+        const members = document.createElement('div');
+        members.className = 'member-list';
+        members.hidden = !expandedRooms.has(room.id);
+        const view = document.createElement('button');
+        view.className = 'member-link';
+        view.textContent = expandedRooms.has(room.id) ? 'Hide members' : 'View members';
+        view.setAttribute('aria-expanded', String(expandedRooms.has(room.id)));
+        view.addEventListener('click', () => {
+            if (expandedRooms.has(room.id)) expandedRooms.delete(room.id);
+            else expandedRooms.add(room.id);
+            const open = expandedRooms.has(room.id);
+            view.textContent = open ? 'Hide members' : 'View members';
+            view.setAttribute('aria-expanded', String(open));
+            members.hidden = !open;
+            if (open) loadMembers(room.id, members);
+        });
+        info.append(label, view);
         const leave = document.createElement('button');
         leave.className = 'quiet';
         leave.textContent = 'Leave';
         leave.setAttribute('aria-label', 'Leave ' + name);
         leave.addEventListener('click', () => runAction(leave, () => soapCall('leaveRoom', { token, roomId: room.id })));
-        item.append(label, leave);
+        item.append(info, leave, members);
         list.append(item);
+        if (expandedRooms.has(room.id)) loadMembers(room.id, members);
         select.add(new Option(name, room.id));
     }
     if (roomCounts.some(room => room.id === previous)) select.value = previous;
@@ -164,6 +208,7 @@ function signOut() {
     availableRooms = [];
     joiningRooms.clear();
     selectedRooms.clear();
+    expandedRooms.clear();
     chat.setRooms([]);
     element('account').textContent = '';
     element('auth').hidden = false;

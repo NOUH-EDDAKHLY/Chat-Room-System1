@@ -70,3 +70,10 @@ button.private-send:active:not(:disabled) { background: #e1f2ee; }
 @media (max-width: 600px) { .workspace { grid-template-columns: 1fr; } .membership, .chat { grid-column: auto; grid-row: auto; } .membership { order: 1; } .chat { order: 2; min-height: 460px; } .top-actions { gap: .45rem; } }
 
 @media (max-width: 600px) { .send-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .send-row input { grid-column: 1 / -1; } }
+
+#joined li { flex-wrap: wrap; }
+.room-info { flex: 1; min-width: 0; }
+.member-link { display: block; margin-top: .2rem; padding: 0; border: 0; background: transparent; color: #155c53; font-size: .8rem; text-align: left; }
+.member-link:hover:not(:disabled) { background: transparent; text-decoration: underline; }
+.member-list { flex: 0 0 100%; background: #f5f8f7; border-radius: 8px; padding: .55rem .7rem; color: #344d49; font-size: .82rem; overflow-wrap: anywhere; }
+.member-list > div + div { margin-top: .25rem; }
